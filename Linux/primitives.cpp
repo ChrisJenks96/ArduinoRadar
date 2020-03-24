@@ -75,3 +75,37 @@ void OpenGLPrimCircle::Render()
         }
     glEnd();
 }
+
+//LINE CLASS
+
+OpenGLPrimLine::OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat length, GLfloat angle)
+{
+    //set up default values for the circles
+    this->x = x;
+    this->y = y;
+    this->angle = angle;
+    this->length = length;
+
+    //default green colour
+    GLfloat default_colour[] = {0.0f, 1.0f, 0.0f};
+    //alloc 2 verts origin and dest
+    AllocColourVertices(4, default_colour);
+
+    //origin point
+    SetVertex(0, x);
+    SetVertex(1, y);
+
+    SetVertex(2, x + cosf(angle) * length);
+    SetVertex(3, y + sinf(angle) * length);
+}
+
+void OpenGLPrimLine::Render()
+{
+    GLfloat* rgb = GetRGB();
+    GLfloat* vertices = GetVertex();
+
+    glBegin(GL_LINES);
+        glColor3f(rgb[0], rgb[1], rgb[2]); glVertex2f(vertices[0], vertices[1]);
+        glColor3f(rgb[0], rgb[1], rgb[2]); glVertex2f(vertices[2], vertices[3]);
+    glEnd();
+}

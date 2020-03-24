@@ -1,3 +1,6 @@
+#ifndef PRIMS_H
+#define PRIMS_H
+
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
@@ -36,3 +39,25 @@ class OpenGLPrimCircle : public OpenGLPrim
         GLfloat x, y;
         unsigned int step;
 };
+
+class OpenGLPrimLine : public OpenGLPrim
+{
+    public:
+        OpenGLPrimLine(){}
+        OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat length, GLfloat angle);
+        GLfloat GetX(){return x;}
+        GLfloat GetY(){return y;}
+        GLfloat GetLength(){return length;}
+        GLfloat GetAngle(){return angle;}
+        void SetAngle(GLfloat newAngle){angle = newAngle;}
+        void addAngle(GLfloat newAngle){angle += newAngle;}
+        void subAngle(GLfloat newAngle){angle -= newAngle;}
+        void Render();
+        ~OpenGLPrimLine(){}
+    private:
+        GLfloat x, y;
+        GLfloat length;
+        GLfloat angle;
+};
+
+#endif

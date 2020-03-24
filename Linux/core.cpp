@@ -58,23 +58,8 @@ void Core::CreateWindow(unsigned int width, unsigned int height)
 void Core::Update()
 {
     //get event information per this frame
-    XNextEvent(disp, &event);
-    //whiel the window is open
-    if (event.type == Expose)
-    {
-        XGetWindowAttributes(disp, window, &gwa);
-        glViewport(0, 0, gwa.width, gwa.height);
-    }
-
-    //if a key is pressed, unload the program
-    else if (event.type == KeyPress)
-    {
-        glXMakeCurrent(disp, None, NULL);
-        glXDestroyContext(disp, context);
-        XDestroyWindow(disp, window);
-        XCloseDisplay(disp);
-        exit(0);
-    }
+    XGetWindowAttributes(disp, window, &gwa);
+    glViewport(0, 0, gwa.width, gwa.height);
 }
 
 void Core::PreGLRender()
@@ -97,5 +82,8 @@ void Core::SwapBuffer()
 
 Core::~Core()
 {
-
+    glXMakeCurrent(disp, None, NULL);
+    glXDestroyContext(disp, context);
+    XDestroyWindow(disp, window);
+    XCloseDisplay(disp);
 }

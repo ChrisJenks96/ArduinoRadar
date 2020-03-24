@@ -1,3 +1,6 @@
+#ifndef CORE_H
+#define CORE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <X11/X.h>
@@ -31,3 +34,5 @@ class Core
         unsigned int width, height;
         void CreateWindow(unsigned int width, unsigned int height);   
 };
+
+#endif
