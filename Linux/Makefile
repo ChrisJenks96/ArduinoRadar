@@ -3,6 +3,7 @@ all:
 	g++ -g -c core.cpp
 	g++ -g -c scanner.cpp
 	g++ -g -c main.cpp
-	g++ -o main -w primitives.o core.o scanner.o main.o -lX11 -lGL -lGLU
+	g++ -g -c font.cpp
+	g++ -w primitives.o core.o scanner.o main.o font.o -o main -lglut -lX11 -lGL -lGLU
 clean:
-	rm primitives.o core.o scanner.o main.o
+	rm primitives.o core.o scanner.o main.o font.o main

@@ -11,7 +11,7 @@ void Scanner::Update(GLfloat angleIncrement)
     line->SetVertex(2, line->GetX() + cosf(line->GetAngle()) * line->GetLength());
     line->SetVertex(3, line->GetY() + sinf(line->GetAngle()) * line->GetLength());
     line->addAngle(angleIncrement);
-    if (line->GetAngle() > 360.0f){
+    if (line->GetAngle() > (MATH_PI * 2)){
         line->SetAngle(0.0f);
     }
 }

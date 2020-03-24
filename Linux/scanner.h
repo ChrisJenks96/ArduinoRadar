@@ -9,6 +9,7 @@ class Scanner
         Scanner(){}
         Scanner(GLfloat x, GLfloat y, GLfloat length, GLfloat angle);
         void Update(GLfloat angleIncrement);
+        OpenGLPrimLine* GetLine(){return line;}
         void Render();
         ~Scanner(){delete line;}
     private:
