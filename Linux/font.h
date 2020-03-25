@@ -11,7 +11,9 @@ class Text
     public:
         Text(){};
         Text(GLfloat rgb[3], GLfloat xy[2]);
-        void Render(char *format, ...);
+        void SetXY(GLfloat x, GLfloat y){xy[0] = x; xy[1] = y;}
+        void AddXY(GLfloat x, GLfloat y){xy[0] += x; xy[1] += y;}
+        void Render(const char *format, ...);
         ~Text(){};
     private:
         GLfloat xy[2];

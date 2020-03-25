@@ -10,6 +10,9 @@
 #define MATH_RAD_TO_DEG(x) (x * (180.0f / MATH_PI))
 #define MATH_DEG_TO_RAD(x) (x * (MATH_PI / 180.0f))
 
+#define RENDER_TYPE_LINE_LOOP 0
+#define RENDER_TYPE_TRIANGLE_FAN 1
+
 //basic base class for opengl primitives
 class OpenGLPrim
 {
@@ -22,6 +25,7 @@ class OpenGLPrim
         GLfloat* GetRGB(){return rgb;}
         unsigned int GetVerticesCount(){return numVertices;}
         virtual void Render() = 0;
+        void SetNumVertices(unsigned int nv){numVertices = nv;}
         ~OpenGLPrim(){FreeColourVertices();}
     private:
         GLfloat* rgb;
@@ -34,7 +38,12 @@ class OpenGLPrimCircle : public OpenGLPrim
     public:
         OpenGLPrimCircle(){}
         OpenGLPrimCircle(GLfloat radius, GLfloat x, GLfloat y, unsigned int step);
-        void Render();
+        void SetXY(GLfloat xy[2]){x = xy[0]; y = xy[1];}
+        void AddXY(GLfloat xy[2]){x += xy[0]; y += xy[1];}
+        void SubXY(GLfloat xy[2]){x -= xy[0]; y -= xy[1];}
+        void RecalculateCircle();
+        void Render(){}
+        void Render(unsigned int renderType);
         ~OpenGLPrimCircle(){}
     private:
         GLfloat radius;
@@ -50,11 +59,16 @@ class OpenGLPrimLine : public OpenGLPrim
         GLfloat GetX(){return x;}
         GLfloat GetY(){return y;}
         GLfloat GetLength(){return length;}
+        //if you want to return direction x,y ... pass in 0.0f as param else you can add a length
+        GLfloat GetDirectionX(GLfloat len){return x + cosf(angle) * len;}
+        GLfloat GetDirectionY(GLfloat len){return y + sinf(angle) * len;}
+        GLfloat SetLength(GLfloat len){length = len;}
         GLfloat GetAngle(){return angle;}
         void SetAngle(GLfloat newAngle){angle = newAngle;}
         void addAngle(GLfloat newAngle){angle += newAngle;}
         void subAngle(GLfloat newAngle){angle -= newAngle;}
-        void Render();
+        void Render(){};
+        void Render(unsigned int renderType);
         ~OpenGLPrimLine(){}
     private:
         GLfloat x, y;

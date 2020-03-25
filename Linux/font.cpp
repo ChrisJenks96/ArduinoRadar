@@ -6,7 +6,7 @@ Text::Text(GLfloat rgb[3], GLfloat xy[2])
     memcpy(&this->xy[0], &xy[0], sizeof(GLfloat) * 2);
 }
 
-void Text::Render(char *format, ...)
+void Text::Render(const char *format, ...)
 {
     const char *c;
     va_list aptr;

@@ -16,7 +16,7 @@ void Scanner::Update(GLfloat angleIncrement)
     }
 }
 
-void Scanner::Render()
+void Scanner::Render(unsigned int renderType)
 {
-    line->Render();
+    line->Render(renderType);
 }

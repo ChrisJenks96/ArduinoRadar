@@ -59,7 +59,7 @@ void Core::Update()
 {
     //get event information per this frame
     XGetWindowAttributes(disp, window, &gwa);
-    glViewport(0, 0, gwa.width, gwa.height);
+    glViewport(0.0f, 0.0f, width, height);
 }
 
 void Core::PreGLRender()

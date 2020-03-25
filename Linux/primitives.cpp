@@ -12,9 +12,9 @@ OpenGLPrim::OpenGLPrim()
 void OpenGLPrim::AllocColourVertices(int numVertices, GLfloat col[3])
 {
     this->numVertices = numVertices;
-    rgb = new GLfloat(sizeof(GLfloat) * this->numVertices);
+    rgb = new GLfloat[3];
     memcpy(&rgb[0], &col[0], sizeof(GLfloat) * 3);
-    vertices = new GLfloat(sizeof(GLfloat) * this->numVertices);
+    vertices = new GLfloat[this->numVertices];
 }
 
 void OpenGLPrim::FreeColourVertices()
@@ -46,11 +46,10 @@ OpenGLPrimCircle::OpenGLPrimCircle(GLfloat radius, GLfloat x, GLfloat y, unsigne
     this->y = y;
     this->step = step;
 
-    //* 2 is for x and y as GLfloat isn't 2d array
-    unsigned int numVertices = step * 2;
     //default green colour
     GLfloat default_colour[] = {0.0f, 1.0f, 0.0f};
-    AllocColourVertices(numVertices, default_colour);
+    //* 2 is for x and y as GLfloat isn't 2d array
+    AllocColourVertices(step * 2, default_colour);
 
     GLfloat theta = 0.0f;
     unsigned int counter = 0;
@@ -63,12 +62,25 @@ OpenGLPrimCircle::OpenGLPrimCircle(GLfloat radius, GLfloat x, GLfloat y, unsigne
     }
 }
 
-void OpenGLPrimCircle::Render()
+void OpenGLPrimCircle::RecalculateCircle()
+{
+    GLfloat theta = 0.0f;
+    unsigned int counter = 0;
+    for (int i = 0; i < step; i++)
+    {
+        theta = 2.0f * MATH_PI * (float(i) / (float)step);
+        SetVertex(counter, x + radius * cosf(theta));
+        SetVertex(counter+1, y + radius * sinf(theta));
+        counter+=2; 
+    }
+}
+
+void OpenGLPrimCircle::Render(unsigned int renderType)
 {
     unsigned int index = 0, counter = 0;
     GLfloat* rgb = GetRGB();
     GLfloat* vertices = GetVertex();
-    glBegin(GL_LINE_LOOP);
+    glBegin(renderType);   
         for (; index < step; index++){
             glColor3f(rgb[0], rgb[1], rgb[2]); glVertex2f(vertices[counter], vertices[counter+1]);
             counter+=2;
@@ -99,12 +111,12 @@ OpenGLPrimLine::OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat length, GLfloat ang
     SetVertex(3, y + sinf(angle) * length);
 }
 
-void OpenGLPrimLine::Render()
+void OpenGLPrimLine::Render(unsigned int renderType)
 {
     GLfloat* rgb = GetRGB();
     GLfloat* vertices = GetVertex();
 
-    glBegin(GL_LINES);
+    glBegin(renderType);
         glColor3f(rgb[0], rgb[1], rgb[2]); glVertex2f(vertices[0], vertices[1]);
         glColor3f(rgb[0], rgb[1], rgb[2]); glVertex2f(vertices[2], vertices[3]);
     glEnd();
