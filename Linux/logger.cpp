@@ -20,7 +20,7 @@ void Logger::WriteToFile()
     }
 }
 
-void Logger::Add(unsigned int angle, unsigned int distance)
+void Logger::Add(unsigned int x, unsigned int y, unsigned int angle, unsigned int distance)
 {
     //if we've exceeded out reserve size, start again
     if (snapCount >= reserveSize){
@@ -38,6 +38,8 @@ void Logger::Add(unsigned int angle, unsigned int distance)
         strftime(snap.shortdateTime, 32, "%x|%X", timeInfo);
         snap.angle = angle;
         snap.distance = distance;
+        snap.x = x;
+        snap.y = y;
         //push back the new data
         snapshotFrames[snapCount] = snap;
         snapCount++;

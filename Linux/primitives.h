@@ -6,12 +6,7 @@
 #include <math.h>
 #include <GL/gl.h>
 
-#define MATH_PI 3.14159f
-#define MATH_RAD_TO_DEG(x) (x * (180.0f / MATH_PI))
-#define MATH_DEG_TO_RAD(x) (x * (MATH_PI / 180.0f))
-
-#define RENDER_TYPE_LINE_LOOP 0
-#define RENDER_TYPE_TRIANGLE_FAN 1
+#include "common.h"
 
 //basic base class for opengl primitives
 class OpenGLPrim

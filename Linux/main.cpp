@@ -9,7 +9,6 @@ int main(int argc, char** argv)
 {
     //this is merely used for text right now...
     glutInit(&argc, argv);
-
     unsigned int width = 800, height = 600;
     Core core(width, height);
 
@@ -33,8 +32,6 @@ int main(int argc, char** argv)
     OpenGLPrimCircle hitCircle(5.0f, circleX, circleY, 8);
 
     Logger log(32);
-    //log when an intersection is made
-    log.Add(MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance);
     Port port(18);
     port.Scan();
 
@@ -64,6 +61,8 @@ int main(int argc, char** argv)
         hitCircle.RecalculateCircle();
         hitCircle.Render(GL_LINE_LOOP);
 
+        log.Add(hitCircleXY[0], hitCircleXY[1], MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance);
+
         text.SetXY(xy[0], xy[1]);
         text.Render("Monitor Mode: TRUE");
         text.AddXY(0.0f, 15.0f);
@@ -81,12 +80,31 @@ int main(int argc, char** argv)
         //output all the relevant data
         if (log.Size() > 0){
             snapshotFrame lastFrame = log.GetLastFrame();
-            text.Render("Last Log: %s|%u|%u", lastFrame.shortdateTime,
+            text.Render("Last Log[%i]: %s|%u|%u", log.Size()-1, lastFrame.shortdateTime,
                 lastFrame.angle, lastFrame.distance);
         }
         //if there is no data, we output nothing
         else
             text.Render("Last Log: NULL");
+
+        text.AddXY(0.0f, 15.0f);
+        //find heading between two logged points
+        if (log.Size() >= 2){
+            snapshotFrame lastFrame = log.GetLastFrame();
+            snapshotFrame beforeLastFrame = log.GetFrame((log.Size()-1)-1);
+            text.Render("Current Heading: (%u,%u)", 
+                (lastFrame.x - beforeLastFrame.x), (lastFrame.y - beforeLastFrame.y));
+            unsigned int xy[] = {lastFrame.x, lastFrame.y, beforeLastFrame.x, beforeLastFrame.y};
+            text.AddXY(0.0f, 15.0f);
+            text.Render("Current Heading Angle: %f", XYToAngleDegrees(xy));
+        }
+
+        else
+        {
+            text.Render("Current Heading: 2 Log Samples Required");
+            text.AddXY(0.0f, 15.0f);
+            text.Render("Current Heading Angle: 2 Log Samples Required");
+        }
         
         //call this once render is complete
         core.SwapBuffer();

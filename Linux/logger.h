@@ -10,6 +10,8 @@ typedef struct snapshotFrame
     char shortdateTime[32];
     unsigned int angle;
     unsigned int distance;
+    unsigned int x;
+    unsigned int y;
 } snapshotFrame;
 
 class Logger
@@ -17,8 +19,9 @@ class Logger
     public:
         Logger(){snapCount = reserveSize = 0;}
         Logger(unsigned int reserveSize);
-        void Add(unsigned int angle, unsigned int distance);
+        void Add(unsigned int x, unsigned int y, unsigned int angle, unsigned int distance);
         snapshotFrame GetLastFrame(){return snapshotFrames[snapCount-1];}
+        snapshotFrame GetFrame(unsigned int id){return snapshotFrames[id];}
         unsigned int Size(){return snapCount;}
         ~Logger();
     private:
