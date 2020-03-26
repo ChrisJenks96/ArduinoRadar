@@ -3,6 +3,7 @@
 #include "scanner.h"
 #include "font.h"
 #include "logger.h"
+#include "port.h"
 
 int main(int argc, char** argv)
 {
@@ -31,14 +32,18 @@ int main(int argc, char** argv)
     //when the ultrasonic sensor hits something, this will be the prim that shows us where
     OpenGLPrimCircle hitCircle(5.0f, circleX, circleY, 8);
 
-    //log format
-    //date | time | angle | dist 
-    Logger log(128);
+    Logger log(32);
     //log when an intersection is made
     log.Add(MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance);
+    Port port(18);
+    port.Scan();
 
     while (1)
     {
+        //boundary testing for the radar distance 
+        if (radarHitDistance >= circleRadius)
+            radarHitDistance = circleRadius;
+        
         //this updates the window
         core.Update();
         //update the angle on the tracking line
@@ -62,7 +67,12 @@ int main(int argc, char** argv)
         text.SetXY(xy[0], xy[1]);
         text.Render("Monitor Mode: TRUE");
         text.AddXY(0.0f, 15.0f);
-        text.Render("Serial Port: %i", -1);
+
+        //if we haven't connected to a serial port yet, scan until we do
+        if (port.GetCOMID() == 0)
+            port.Scan();
+        text.Render("Serial Port: %i", port.GetCOMID());
+        
         text.AddXY(0.0f, 15.0f);
         text.Render("Scanner Angle (Degrees): %f\n", MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()));
         text.AddXY(0.0f, 15.0f);
