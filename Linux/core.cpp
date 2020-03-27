@@ -59,11 +59,11 @@ void Core::Update()
 {
     //get event information per this frame
     XGetWindowAttributes(disp, window, &gwa);
-    glViewport(0.0f, 0.0f, width, height);
 }
 
 void Core::PreGLRender()
 {
+    glViewport(0.0f, 0.0f, width, height);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);

@@ -36,6 +36,8 @@ class OpenGLPrimCircle : public OpenGLPrim
         void SetXY(GLfloat xy[2]){x = xy[0]; y = xy[1];}
         void AddXY(GLfloat xy[2]){x += xy[0]; y += xy[1];}
         void SubXY(GLfloat xy[2]){x -= xy[0]; y -= xy[1];}
+        GLfloat GetRadius(){return radius;}
+        GLfloat* GetXY(){GLfloat xy[] = {x, y}; return xy;}
         void RecalculateCircle();
         void Render(){}
         void Render(unsigned int renderType);
@@ -50,14 +52,14 @@ class OpenGLPrimLine : public OpenGLPrim
 {
     public:
         OpenGLPrimLine(){}
-        OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat length, GLfloat angle);
+        OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat* length, GLfloat angle);
         GLfloat GetX(){return x;}
         GLfloat GetY(){return y;}
-        GLfloat GetLength(){return length;}
+        GLfloat GetLength(){return *length;}
         //if you want to return direction x,y ... pass in 0.0f as param else you can add a length
-        GLfloat GetDirectionX(GLfloat len){return x + cosf(angle) * len;}
-        GLfloat GetDirectionY(GLfloat len){return y + sinf(angle) * len;}
-        GLfloat SetLength(GLfloat len){length = len;}
+        GLfloat GetDirectionX(){return x + cosf(angle) * (*length);}
+        GLfloat GetDirectionY(){return y + sinf(angle) * (*length);}
+        GLfloat SetLength(GLfloat len){*length = len;}
         GLfloat GetAngle(){return angle;}
         void SetAngle(GLfloat newAngle){angle = newAngle;}
         void addAngle(GLfloat newAngle){angle += newAngle;}
@@ -67,7 +69,7 @@ class OpenGLPrimLine : public OpenGLPrim
         ~OpenGLPrimLine(){}
     private:
         GLfloat x, y;
-        GLfloat length;
+        GLfloat* length;
         GLfloat angle;
 };
 

@@ -90,7 +90,7 @@ void OpenGLPrimCircle::Render(unsigned int renderType)
 
 //LINE CLASS
 
-OpenGLPrimLine::OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat length, GLfloat angle)
+OpenGLPrimLine::OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat* length, GLfloat angle)
 {
     //set up default values for the circles
     this->x = x;
@@ -107,8 +107,8 @@ OpenGLPrimLine::OpenGLPrimLine(GLfloat x, GLfloat y, GLfloat length, GLfloat ang
     SetVertex(0, x);
     SetVertex(1, y);
 
-    SetVertex(2, x + cosf(angle) * length);
-    SetVertex(3, y + sinf(angle) * length);
+    SetVertex(2, x + cosf(angle) * (*length));
+    SetVertex(3, y + sinf(angle) * (*length));
 }
 
 void OpenGLPrimLine::Render(unsigned int renderType)

@@ -1,11 +1,12 @@
 #include "scanner.h"
 
-Scanner::Scanner(GLfloat x, GLfloat y, GLfloat length, GLfloat angle)
+Scanner::Scanner(GLfloat x, GLfloat y, GLfloat* length, GLfloat angle, GLfloat angleIncrement)
 {
+    this->angleIncrement = angleIncrement;
     line = new OpenGLPrimLine(x, y, length, angle);
 }
 
-void Scanner::Update(GLfloat angleIncrement)
+void Scanner::Update()
 {
     //work out destination point as it relies on the angle
     line->SetVertex(2, line->GetX() + cosf(line->GetAngle()) * line->GetLength());
