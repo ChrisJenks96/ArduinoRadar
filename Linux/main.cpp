@@ -5,20 +5,24 @@
 #include "logger.h"
 #include "port.h"
 
+//https://www.bogotobogo.com/cplusplus/C11/1_C11_creating_thread.php
 #include <thread>
 
 //this function is allocated to the logger thread
 void log_update(Logger* log, Scanner* scanner)
 {
+    //printf("LOG_THREAD log_update start\n");
     GLfloat hitCircleXY[] = {scanner->GetLine()->GetDirectionX(), 
         scanner->GetLine()->GetDirectionY()};
     log->Add(hitCircleXY[0], hitCircleXY[1], 
         MATH_RAD_TO_DEG(scanner->GetLine()->GetAngle()), scanner->GetLine()->GetLength());
+    //printf("LOG_THREAD log_update done\n");
 }
 
 //this is for the general game updating thread
 void game_update(Core* core, Scanner* scanner, Port* port, OpenGLPrim** prims)
 {
+    //printf("LOGIC_THREAD game_update start\n");
     //this updates the window
     core->Update();
     //if the COM port was not found at the start of execution then search for the COM port again
@@ -44,6 +48,8 @@ void game_update(Core* core, Scanner* scanner, Port* port, OpenGLPrim** prims)
     hitCircle->SetXY(hitCircleXY);
     //call this to recalculate the new circle
     hitCircle->RecalculateCircle();
+
+    //printf("LOGIC_THREAD game_update done\n");
 }
 
 int main(int argc, char** argv)
@@ -91,6 +97,7 @@ int main(int argc, char** argv)
         //get the starting frame time
         beginFrame = clock();
 
+        //printf("MAIN_THREAD main() start\n");
         //UPDATE CODE
         OpenGLPrim* prims[] = {&circle, &hitCircle};
         threads[LOGIC_THREAD] = std::thread(&game_update, &core, &scanner, &port, prims);
@@ -100,7 +107,9 @@ int main(int argc, char** argv)
         float currentHeadingDegrees = XYToAngleDegrees(currentHeadingData);
         int logSize = log.Size();
 
+        //wait for the LOGIC_THREAD to finish
         threads[LOGIC_THREAD].join();
+        //wait for LOG_THREAD to finish
         threads[LOG_THREAD].join();
 
         //RENDERING CODE - RUNS ON MAIN THREAD WHEN CPU LOGIC TASKS ARE DONE
@@ -112,12 +121,10 @@ int main(int argc, char** argv)
         hitCircle.Render(GL_LINE_LOOP);
         text.SetXY(xy[0], xy[1]);
         //for performance testing
-        text.Render("Deltatime: %u", deltaTime);
-        text.AddXY(0.0f, 15.0f);
+        core.SetWindowTitle("Deltatime: %u", deltaTime);
         //monitor mode will just allows us to view what's going on
-        text.Render("Monitor Mode: TRUE");
+        /*text.Render("Monitor Mode: TRUE");
         text.AddXY(0.0f, 15.0f);
-        
         text.Render("Serial Port: %i", port.GetCOMID());
         text.AddXY(0.0f, 15.0f);
         text.Render("Scanner Angle (Degrees): %f\n", MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()));
@@ -137,8 +144,7 @@ int main(int argc, char** argv)
 
         text.AddXY(0.0f, 15.0f);
         //find heading between two logged points
-        if (logSize >= 2)
-        {
+        if (logSize >= 2){
             lastFrame = log.GetLastFrame();
             beforeLastFrame = log.GetFrame(logSize-1);
             text.Render("Current Heading: (%u,%u)", (lastFrame.x - beforeLastFrame.x), (lastFrame.y - beforeLastFrame.y));
@@ -151,10 +157,14 @@ int main(int argc, char** argv)
             text.Render("Current Heading: 2 Log Samples Required");
             text.AddXY(0.0f, 15.0f);
             text.Render("Current Heading Angle: 2 Log Samples Required");
-        }
+        }*/
     
+        text.Render("");
+
         //call this once render is complete
         core.SwapBuffer();
+
+        //printf("MAIN_THREAD main() done\n");
 
         endFrame = clock();
         frames++;

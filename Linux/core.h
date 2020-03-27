@@ -2,6 +2,7 @@
 #define CORE_H
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -18,6 +19,7 @@ class Core
         Core(unsigned int width, unsigned int height);
         void Update();
         void PreGLRender();
+        void SetWindowTitle(const char *format, ...);
         void SwapBuffer();
         ~Core();
     private:  

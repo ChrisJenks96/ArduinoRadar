@@ -53,6 +53,19 @@ void Core::CreateWindow(unsigned int width, unsigned int height)
     //bind opengl to the window
     context = glXCreateContext(disp, vi, NULL, GL_TRUE);
     glXMakeCurrent(disp, window, context);
+    //enable textures
+    glEnable(GL_TEXTURE_2D);
+}
+
+void Core::SetWindowTitle(const char *format, ...)
+{
+    char buffer[32];
+    va_list aptr;
+    int ret;
+    va_start(aptr, format);
+    ret = vsprintf(buffer, format, aptr);
+    va_end(aptr);
+    XStoreName(disp, window, buffer);
 }
 
 void Core::Update()
