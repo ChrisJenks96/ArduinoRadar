@@ -8,15 +8,13 @@ Logger::Logger(unsigned int reserveSize)
     this->reserveSize = reserveSize;
     snapCount = 0;
     snapshotFrames = new snapshotFrame[reserveSize];
+    f = fopen("LOG.TXT", "wb");
 }
 
 void Logger::WriteToFile()
 {
-    FILE* f = fopen("LOG.TXT", "wb");
     if (f){
         fwrite(&snapshotFrames[0], sizeof(snapshotFrame) * reserveSize, 1, f);
-        fclose(f);
-        return;
     }
 }
 
@@ -29,7 +27,7 @@ void Logger::Add(int x, int y, unsigned int angle, unsigned int distance)
         memset(&snapshotFrames[0], 0, sizeof(snapshotFrame) * reserveSize);
     }
 
-    else
+    if (snapCount < reserveSize)
     {
         snapshotFrame snap;
         //get all the neccessary data for logging
@@ -48,5 +46,6 @@ void Logger::Add(int x, int y, unsigned int angle, unsigned int distance)
 
 Logger::~Logger()
 {
+    fclose(f);
     delete snapshotFrames;
 }

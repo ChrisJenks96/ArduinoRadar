@@ -25,6 +25,7 @@ class Logger
         unsigned int Size(){return snapCount;}
         ~Logger();
     private:
+        FILE* f;
         unsigned int reserveSize;
         unsigned int snapCount;
         time_t rawTime;

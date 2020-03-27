@@ -92,16 +92,16 @@ int main(int argc, char** argv)
         beginFrame = clock();
 
         //UPDATE CODE
-        threads[LOG_THREAD] = std::thread(&log_update, &log, &scanner);
-        threads[LOG_THREAD].join();
-
         OpenGLPrim* prims[] = {&circle, &hitCircle};
         threads[LOGIC_THREAD] = std::thread(&game_update, &core, &scanner, &port, prims);
-        threads[LOGIC_THREAD].join();
+        threads[LOG_THREAD] = std::thread(&log_update, &log, &scanner);
 
         int currentHeadingData[] = {lastFrame.x, lastFrame.y, beforeLastFrame.x, beforeLastFrame.y};
         float currentHeadingDegrees = XYToAngleDegrees(currentHeadingData);
         int logSize = log.Size();
+
+        threads[LOGIC_THREAD].join();
+        threads[LOG_THREAD].join();
 
         //RENDERING CODE - RUNS ON MAIN THREAD WHEN CPU LOGIC TASKS ARE DONE
         
