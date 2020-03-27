@@ -19,17 +19,23 @@ class Text
     public:
         Text(){};
         Text(GLfloat rgb[3], GLfloat xy[2]);
+        void CreateVertexTexCoordBuffer(const char *format, ...);
         void SetXY(GLfloat x, GLfloat y){xy[0] = x; xy[1] = y;}
         void AddXY(GLfloat x, GLfloat y){xy[0] += x; xy[1] += y;}
-        void Render(const char *format, ...);
-        ~Text(){glDeleteTextures(1, &textureID);}
+        void Render();
+        ~Text(){glDeleteTextures(1, &textureID); delete texCoordinatesUV; delete vertexXY;}
     private:
         BMP bmp;
         GLuint textureID;
+        GLfloat* texCoordinatesUV;
+        GLfloat* vertexXY;
         GLfloat xy[2];
         GLfloat rgb[3];
         //fixed size buffer for formatted text
-        char buffer[128];
+        static const int bufferSize = 256;
+        char buffer[bufferSize];
+        int totalCharacters;
+        bool firstTimeFontBuffer;
 
         bool LoadBMP();
         void GenGLTexture();

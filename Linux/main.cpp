@@ -107,6 +107,17 @@ int main(int argc, char** argv)
         float currentHeadingDegrees = XYToAngleDegrees(currentHeadingData);
         int logSize = log.Size();
 
+        //generate the vertex/tex coord information on the CPU
+        text.CreateVertexTexCoordBuffer(
+            "MONITOR MODE: TRUE\n"
+            "DELTA TIME: %u\n"
+            "SERIAL PORT: %i\n"
+            "SCANNER ANGLE: %.1f\n"
+            "RADAR HIT DISTANCE: %.1f\n"
+            "LAST LOG[%i]: %s|%u|%u", deltaTime, port.GetCOMID(), 
+                MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance,
+                    logSize-1, lastFrame.shortDateTime, lastFrame.angle, lastFrame.distance);
+
         //wait for the LOGIC_THREAD to finish
         threads[LOGIC_THREAD].join();
         //wait for LOG_THREAD to finish
@@ -119,47 +130,9 @@ int main(int argc, char** argv)
         circle.Render(GL_LINE_LOOP);
         scanner.Render(GL_LINES);
         hitCircle.Render(GL_LINE_LOOP);
-        text.SetXY(xy[0], xy[1]);
-        //for performance testing
-        core.SetWindowTitle("Deltatime: %u", deltaTime);
         //monitor mode will just allows us to view what's going on
-        /*text.Render("Monitor Mode: TRUE");
-        text.AddXY(0.0f, 15.0f);
-        text.Render("Serial Port: %i", port.GetCOMID());
-        text.AddXY(0.0f, 15.0f);
-        text.Render("Scanner Angle (Degrees): %f\n", MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()));
-        text.AddXY(0.0f, 15.0f);
-        text.Render("Radar Hit Distance: %f", radarHitDistance);
-        text.AddXY(0.0f, 15.0f);
 
-        //output all the relevant data
-        if (logSize > 0){
-            lastFrame = log.GetLastFrame();
-            text.Render("Last Log[%i]: %s|%u|%u", logSize-1, lastFrame.shortdateTime,
-                lastFrame.angle, lastFrame.distance);
-        }
-        //if there is no data, we output nothing
-        else
-            text.Render("Last Log: NULL");
-
-        text.AddXY(0.0f, 15.0f);
-        //find heading between two logged points
-        if (logSize >= 2){
-            lastFrame = log.GetLastFrame();
-            beforeLastFrame = log.GetFrame(logSize-1);
-            text.Render("Current Heading: (%u,%u)", (lastFrame.x - beforeLastFrame.x), (lastFrame.y - beforeLastFrame.y));
-            text.AddXY(0.0f, 15.0f);
-            text.Render("Current Heading Angle: %f", currentHeadingDegrees);
-        }
-
-        else
-        {
-            text.Render("Current Heading: 2 Log Samples Required");
-            text.AddXY(0.0f, 15.0f);
-            text.Render("Current Heading Angle: 2 Log Samples Required");
-        }*/
-    
-        text.Render("");
+        text.Render();
 
         //call this once render is complete
         core.SwapBuffer();

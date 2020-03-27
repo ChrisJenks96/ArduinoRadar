@@ -7,7 +7,7 @@
 
 typedef struct snapshotFrame
 {
-    char shortdateTime[32];
+    char shortDateTime[32];
     unsigned int angle;
     unsigned int distance;
     int x;

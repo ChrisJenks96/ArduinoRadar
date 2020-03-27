@@ -33,7 +33,7 @@ void Logger::Add(int x, int y, unsigned int angle, unsigned int distance)
         //get all the neccessary data for logging
         time(&rawTime);
         timeInfo = localtime(&rawTime);
-        strftime(snap.shortdateTime, 32, "%x|%X", timeInfo);
+        strftime(snap.shortDateTime, 32, "%x|%X", timeInfo);
         snap.angle = angle;
         snap.distance = distance;
         snap.x = x;
