@@ -5,12 +5,23 @@
 #include "logger.h"
 #include "port.h"
 
+#include <thread>
+
 int main(int argc, char** argv)
 {
+    Port port(18);
+    //allocate threads to critical tasks
+    unsigned int currentThreads = std::thread::hardware_concurrency();
+    std::thread* threads = new std::thread[currentThreads];
+
+    //start scanning for the ports while the main thread sets up
+    threads[LOGIC_THREAD] = std::thread(&Port::Scan, &port);
+
     //this is merely used for text right now...
     glutInit(&argc, argv);
     unsigned int width = 800, height = 600;
     Core core(width, height);
+    Logger log(32);
 
     //if we hit something using radar, use this value to alter it
     //when nothing is hit, reset back to the circle radius
@@ -31,52 +42,91 @@ int main(int argc, char** argv)
     //when the ultrasonic sensor hits something, this will be the prim that shows us where
     OpenGLPrimCircle hitCircle(5.0f, circleX, circleY, 8);
 
-    Logger log(32);
-    Port port(18);
-    port.Scan();
+    //performance logging
+    clock_t beginFrame = 0, endFrame = 0;
+    unsigned int deltaTime = 0, frames = 0;
+
+    //thread must be joined before join call and destruction
+    if (threads[LOGIC_THREAD].joinable())
+        threads[LOGIC_THREAD].join();
+
+    //if the COM port is still not found, set flag for searching again
+    bool COMPortSearch;
+    if (port.GetCOMID() == -1)
+        COMPortSearch = true;
+    else
+        COMPortSearch = false;
 
     while (1)
     {
+        //get the starting frame time
+        beginFrame = clock();
+
+        //UPDATE CODE
+
+        //if the COM port was not found at the start of execution then search for the COM port again
+        if (port.GetCOMID() == -1){
+            threads[LOGIC_THREAD] = std::thread(&Port::Scan, &port);
+            COMPortSearch = true;
+        }
+
         //boundary testing for the radar distance 
         if (radarHitDistance >= circleRadius)
             radarHitDistance = circleRadius;
-        
-        //this updates the window
-        core.Update();
+        if (radarHitDistance <= 0.0f)
+            radarHitDistance = 0.0f;
         //update the angle on the tracking line
         scanner.Update(0.01f);
-        //call this before rendering anything
-        core.PreGLRender();
-        //render stuff here...
-        circle.Render(GL_LINE_LOOP);
-
         scanner.GetLine()->SetLength(radarHitDistance);
-        scanner.Render(GL_LINES);
-
         //when the radar has hit something, this is the positional vector
         GLfloat hitCircleXY[] = {scanner.GetLine()->GetDirectionX(radarHitDistance), 
             scanner.GetLine()->GetDirectionY(radarHitDistance)};
         hitCircle.SetXY(hitCircleXY);
         //call this to recalculate the new circle
         hitCircle.RecalculateCircle();
+        
+        threads[LOG_THREAD] = std::thread(&Logger::Add, &log, hitCircleXY[0], hitCircleXY[1], MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance);
+        //log.Add(hitCircleXY[0], hitCircleXY[1], MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance);
+
+        //RENDERING CODE
+
+        //this updates the window
+        core.Update();
+        
+        //call this before rendering anything
+        core.PreGLRender();
+        
+        circle.Render(GL_LINE_LOOP);
+        scanner.Render(GL_LINES);
         hitCircle.Render(GL_LINE_LOOP);
-
-        log.Add(hitCircleXY[0], hitCircleXY[1], MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()), radarHitDistance);
-
         text.SetXY(xy[0], xy[1]);
+        //for performance testing
+        text.Render("Deltatime: %u", deltaTime);
+        text.AddXY(0.0f, 15.0f);
+        //monitor mode will just allows us to view what's going on
         text.Render("Monitor Mode: TRUE");
         text.AddXY(0.0f, 15.0f);
+        //finish off the COM port search before printing out to screen
+        if (COMPortSearch)
+        {
+            if (threads[LOGIC_THREAD].joinable())
+                threads[LOGIC_THREAD].join();
+            //if the port has been acquired, no need for thread to search for COM port
+            if (port.GetCOMID() != -1)
+                COMPortSearch = false;
+        }
 
-        //if we haven't connected to a serial port yet, scan until we do
-        if (port.GetCOMID() == 0)
-            port.Scan();
         text.Render("Serial Port: %i", port.GetCOMID());
-        
         text.AddXY(0.0f, 15.0f);
         text.Render("Scanner Angle (Degrees): %f\n", MATH_RAD_TO_DEG(scanner.GetLine()->GetAngle()));
         text.AddXY(0.0f, 15.0f);
         text.Render("Radar Hit Distance: %f", radarHitDistance);
         text.AddXY(0.0f, 15.0f);
+        
+        //acquire all log data from seperate thread before log information printing
+        if (threads[LOG_THREAD].joinable())
+            threads[LOG_THREAD].join();
+
         //output all the relevant data
         if (log.Size() > 0){
             snapshotFrame lastFrame = log.GetLastFrame();
@@ -91,10 +141,10 @@ int main(int argc, char** argv)
         //find heading between two logged points
         if (log.Size() >= 2){
             snapshotFrame lastFrame = log.GetLastFrame();
-            snapshotFrame beforeLastFrame = log.GetFrame((log.Size()-1)-1);
+            snapshotFrame beforeLastFrame = log.GetFrame(log.Size()-1);
             text.Render("Current Heading: (%u,%u)", 
                 (lastFrame.x - beforeLastFrame.x), (lastFrame.y - beforeLastFrame.y));
-            unsigned int xy[] = {lastFrame.x, lastFrame.y, beforeLastFrame.x, beforeLastFrame.y};
+            int xy[] = {lastFrame.x, lastFrame.y, beforeLastFrame.x, beforeLastFrame.y};
             text.AddXY(0.0f, 15.0f);
             text.Render("Current Heading Angle: %f", XYToAngleDegrees(xy));
         }
@@ -105,10 +155,19 @@ int main(int argc, char** argv)
             text.AddXY(0.0f, 15.0f);
             text.Render("Current Heading Angle: 2 Log Samples Required");
         }
-        
+    
         //call this once render is complete
         core.SwapBuffer();
+
+        endFrame = clock();
+        frames++;
+        //every 50 frames update the delta time 
+        if (frames > 50){
+            deltaTime = endFrame - beginFrame;
+            frames = 0;
+        }
     }
 
+    delete threads;
     return 0;
 }
